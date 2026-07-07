@@ -11,21 +11,19 @@ import {
 import { UserService } from './user.service';
 import {CreateUserDto} from "./dto/create-user.dto";
 import {UpdateUserDto} from "./dto/update-user.dto";
+import {QueryUserDto} from "./dto/query-user.dto";
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
+  @Get('list')
+  findAll(@Query () query: QueryUserDto) {
+    return this.userService.findAll(query);
+  }
   @Post('add')
   addUser(@Body() user: CreateUserDto) {
     return this.userService.addUser(user);
   }
-
-  @Get('list')
-  findAll() {
-    return this.userService.findAll();
-  }
-
   @Get('/:id')
   getUserById(@Param('id') id: string) {
     return this.userService.getUserById(id);
