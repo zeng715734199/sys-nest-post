@@ -9,42 +9,35 @@ import {
   Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from './user';
+import {CreateUserDto} from "./dto/create-user.dto";
+import {UpdateUserDto} from "./dto/update-user.dto";
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('info')
-  getUserInfo(): string {
-    return this.userService.getUserInfo();
-  }
-
-  @Get('info/:id')
-  getUserById(@Param('id') id: string) {
-    return this.userService.getUserById(id);
+  @Post('add')
+  addUser(@Body() user: CreateUserDto) {
+    return this.userService.addUser(user);
   }
 
   @Get('list')
-  getUserList(
-    @Query('pageNum') pageNum: number,
-    @Query('pageSize') pageSize: number,
-  ) {
-    return this.userService.getUserList({ pageNum, pageSize });
+  findAll() {
+    return this.userService.findAll();
   }
 
-  @Post('create')
-  createUser(@Body() user: User) {
-    return this.userService.createUser(user);
-  }
-
-  @Put('update/:id')
-  updateUser(@Param('id') id: string, @Body() user: User) {
-    return this.userService.updateUser({ id, user });
+  @Get('/:id')
+  getUserById(@Param('id') id: string) {
+    return this.userService.getUserById(id);
   }
 
   @Delete('delete/:id')
   deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(id);
+  }
+
+  @Put('update/:id')
+  updateUser(@Param('id') id: string, @Body() user: UpdateUserDto) {
+    return this.userService.updateUser({ id, user });
   }
 }
