@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { MailService } from './mail.service';
 import {CreateUserDto} from "./dto/create-user.dto";
 import {PrismaService} from "../prisma/prisma.service";
 import {UserFindManyArgs, UserFindUniqueArgs} from "../generated/prisma/models/User";
