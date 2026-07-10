@@ -5,6 +5,7 @@ import {
   SystemMessage,
   AIMessageChunk,
 } from '@langchain/core/messages';
+import { StringOutputParser } from '@langchain/core/output_parsers';
 import type { Response } from 'express';
 import { config } from '../config';
 
@@ -75,5 +76,18 @@ export class ModelsService {
     }
     // 完成数据传输，关闭连接
     response.end();
+  }
+  // pipeline 组合多个模型一起使用的示例，先用一个模型生成提示词，再用另一个模型根据提示词生成回答
+  async chatParser(message: string) {
+    // prompt 模板，包含一个占位符{question}，用于接收用户输入的问题
+    // llm
+    // parser 解析器,用于从模型的输出中提取结构化数据,这里我我们用一个简单的正则表达式解析器,提取出回答中的关键词
+    const chain = this.llm.pipe(new StringOutputParser());
+    const answer = await chain.invoke([new HumanMessage(message)]);
+    return {
+      question: message,
+      // answer 是一个字符串，不再需要从response中提取
+      answer,
+    };
   }
 }

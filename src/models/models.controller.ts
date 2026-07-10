@@ -14,7 +14,7 @@ export class ModelsController {
     return this.modelsService.systemChat(system, message);
   }
   @Post('chat-stream')
-  async streamChat(
+  streamChat(
     @Body() { message, system }: { message: string; system: string },
     @Res() response: Response,
   ) {
@@ -23,5 +23,9 @@ export class ModelsController {
       system,
       response,
     });
+  }
+  @Post('chat-parser')
+  chatParser(@Body() { message }: { message: string }) {
+    return this.modelsService.chatParser(message);
   }
 }
