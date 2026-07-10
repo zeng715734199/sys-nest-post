@@ -5,6 +5,12 @@ import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PostModule } from './post/post.module';
 import { ConfigModule } from '@nestjs/config';
+import { ChainsModule } from './chains/chains.module';
+import { AgentsModule } from './agents/agents.module';
+import { MemoryModule } from './memory/memory.module';
+import { RagModule } from './rag/rag.module';
+import { FunctionCallingModule } from './function-calling/function-calling.module';
+import { ModelsModule } from './models/models.module';
 
 @Module({
   imports: [
@@ -14,6 +20,12 @@ import { ConfigModule } from '@nestjs/config';
     UserModule,
     PostModule,
     PrismaModule,
+    ChainsModule,
+    AgentsModule,
+    MemoryModule,
+    RagModule,
+    FunctionCallingModule,
+    ModelsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
