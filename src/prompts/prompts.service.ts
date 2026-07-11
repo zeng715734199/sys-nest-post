@@ -1,4 +1,8 @@
-import { ChatPromptTemplate } from '@langchain/core/prompts';
+import {
+  ChatPromptTemplate,
+  FewShotPromptTemplate,
+  PromptTemplate,
+} from '@langchain/core/prompts';
 import { ChatOllama } from '@langchain/ollama';
 import { Injectable } from '@nestjs/common';
 import { config } from '../config';
@@ -51,6 +55,49 @@ export class PromptsService {
     return {
       text,
       answer,
+    };
+  }
+  /**
+   * 对输入的文本进行情感分类的方法
+   * @param text - 需要进行情感分类的文本内容
+   * @returns 返回一个包含原始文本和分类结果的对象
+   */
+  async classify(text: string) {
+    // 定义示例数据，包含输入文本及其对应的情感标签
+    const examples = [
+      { input: '真倒霉，出门没带伞淋雨了', label: '消极' },
+      { input: '今天天气很好，风和日丽', label: '积极' },
+      { input: '这个产品质量一般，不太满意', label: '消极' },
+      { input: '这个产品很好用，推荐给大家', label: '积极' },
+      { input: '这个电影还行，有些地方不错', label: '中性' },
+      { input: '这道菜还可以，不难吃', label: '中性' },
+    ];
+    // 创建示例提示模板，用于格式化示例输入和输出
+    const examplePrompt = PromptTemplate.fromTemplate(
+      '输入 {input}，输出 {label}',
+    );
+    // 创建少样本提示模板，用于构建完整的提示
+    const fewShotPrompt = new FewShotPromptTemplate({
+      examples, // 使用上面定义的示例数据
+      examplePrompt, // 使用上面创建的示例提示模板
+      prefix: '请根据输入文本内容进行情感分类，输出为积极、消极或中性；', // 添加前缀说明任务
+      suffix: '输入：{text} \n输出', // 添加后缀，待填充的输入文本
+      inputVariables: ['text'], // 定义输入变量
+    });
+    const formattedPrompt = await fewShotPrompt.format({ text });
+    const res = await this.llm.invoke(formattedPrompt);
+    /**
+     *    // TODO 使用处理链的写法：
+     *    // 创建处理链：少样本提示 -> 语言模型 -> 字符串输出解析器
+     *    const chain = fewShotPrompt.pipe(this.llm).pipe(new StringOutputParser());
+     *    // 调用处理链，传入待分类的文本，获取分类结果
+     *    const answer = await chain.invoke({ text });
+     */
+
+    // 返回包含原始文本和分类结果的对象
+    return {
+      text,
+      answer: res.content,
     };
   }
 }
