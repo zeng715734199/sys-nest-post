@@ -100,4 +100,21 @@ export class PromptsService {
       answer: res.content,
     };
   }
+  async codeReview(code: string, language: string) {
+    const prompt = ChatPromptTemplate.fromMessages([
+      [
+        'system',
+        '你是一个 {language} 代码审查专家，请根据代码内容给出详细的审查意见。',
+      ],
+      ['human', '请根据以下代码内容进行代码审查：{code}'],
+    ]);
+    const chain = prompt.pipe(this.llm).pipe(new StringOutputParser());
+    const review = await chain.invoke({ code, language });
+
+    return {
+      language,
+      code,
+      review,
+    };
+  }
 }

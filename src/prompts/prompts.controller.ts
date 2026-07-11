@@ -22,4 +22,8 @@ export class PromptsController {
   classify(@Body('text') text: string) {
     return this.promptsService.classify(text);
   }
+  @Post('codeReview')
+  codeReview(@Body() { code, language }: { code: string; language: string }) {
+    return this.promptsService.codeReview(code, language);
+  }
 }
