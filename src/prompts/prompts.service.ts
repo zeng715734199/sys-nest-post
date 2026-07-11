@@ -35,4 +35,22 @@ export class PromptsService {
       answer,
     };
   }
+  /**
+   * @description 异步总结给定文本，将其压缩至指定的最大字数内。
+   * @param {string} text - 需要被总结的原始文本内容。
+   * @param {number} maxWords - 总结后文本允许的最大字数。
+   * @returns {Promise<{ text: string; answer: string }>} 返回一个包含原始文本和总结后文本的对象。
+   */
+  async summarize(text: string, maxWords: number) {
+    const prompt = ChatPromptTemplate.fromTemplate(
+      '请将以下内容总结成不超过 {maxWords} 个字的版本：{text}',
+    );
+    const chain = prompt.pipe(this.llm).pipe(new StringOutputParser());
+    const answer = await chain.invoke({ text, maxWords });
+
+    return {
+      text,
+      answer,
+    };
+  }
 }
