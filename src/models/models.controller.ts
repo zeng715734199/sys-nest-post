@@ -28,4 +28,10 @@ export class ModelsController {
   chatParser(@Body() { message }: { message: string }) {
     return this.modelsService.chatParser(message);
   }
+  @Post('chat-parser-chain')
+  chatParserChain(
+    @Body() { message, role }: { message: string; role: string },
+  ) {
+    return this.modelsService.chatParserChain(message, role);
+  }
 }

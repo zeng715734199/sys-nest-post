@@ -6,6 +6,7 @@ import {
   AIMessageChunk,
 } from '@langchain/core/messages';
 import { StringOutputParser } from '@langchain/core/output_parsers';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
 import type { Response } from 'express';
 import { config } from '../config';
 
@@ -87,6 +88,18 @@ export class ModelsService {
     return {
       question: message,
       // answer 是一个字符串，不再需要从response中提取
+      answer,
+    };
+  }
+  async chatParserChain(message: string, role: string) {
+    const prompt = ChatPromptTemplate.fromMessages([
+      ['system', '你是一个 {role} 用专业角度回答问题.'],
+      ['human', '问题: {message}'],
+    ]);
+    const chain = prompt.pipe(this.llm).pipe(new StringOutputParser());
+    const answer = await chain.invoke({ role, message });
+    return {
+      question: message,
       answer,
     };
   }
