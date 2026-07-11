@@ -91,6 +91,12 @@ export class ModelsService {
       answer,
     };
   }
+  /**
+   * @description 异步解析聊天链，根据给定的角色和消息生成专业的回答。
+   * @param {string} message - 用户输入的问题或消息。
+   * @param {string} role - AI扮演的专业角色，用于指导回答的角度和风格。
+   * @returns {Promise<{question: string, answer: string}>} 返回一个包含原始问题和AI生成回答的对象。
+   */
   async chatParserChain(message: string, role: string) {
     const prompt = ChatPromptTemplate.fromMessages([
       ['system', '你是一个 {role} 用专业角度回答问题.'],

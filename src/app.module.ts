@@ -11,6 +11,7 @@ import { MemoryModule } from './memory/memory.module';
 import { RagModule } from './rag/rag.module';
 import { FunctionCallingModule } from './function-calling/function-calling.module';
 import { ModelsModule } from './models/models.module';
+import { PromptsModule } from './prompts/prompts.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ModelsModule } from './models/models.module';
     RagModule,
     FunctionCallingModule,
     ModelsModule,
+    PromptsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
