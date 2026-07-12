@@ -12,4 +12,8 @@ export class ChainsController {
   generateBlog(@Body() body: { keywords: string; style: string }) {
     return this.chainsService.generateBlog(body.keywords, body.style);
   }
+  @Post('router')
+  smartRouter(@Body() body: { question: string }) {
+    return this.chainsService.smartRouter(body.question);
+  }
 }
