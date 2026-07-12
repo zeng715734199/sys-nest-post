@@ -8,4 +8,8 @@ export class ChainsController {
   polishArticle(@Body() body: { article: string }) {
     return this.chainsService.polishArticle(body.article);
   }
+  @Post('blog')
+  generateBlog(@Body() body: { keywords: string; style: string }) {
+    return this.chainsService.generateBlog(body.keywords, body.style);
+  }
 }
