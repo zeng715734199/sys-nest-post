@@ -50,7 +50,7 @@ export class AgentsService {
       if (product.stock === 0) {
         return `商品 ${productName} 已售罄`;
       }
-      return `商品 ${productName} 的库存是 ${product.stock}，价格是 ${product.price} 元，分类是 ${product.category}`;
+      return `商品 ${productName} 有货，库存是 ${product.stock}，价格是 ${product.price} 元，分类是 ${product.category}`;
     },
     {
       name: 'check_product',
@@ -70,11 +70,11 @@ export class AgentsService {
     ({
       productName,
       quantity,
-      customName,
+      customerName,
     }: {
       productName: string;
       quantity: number;
-      customName: string;
+      customerName: string;
     }) => {
       // 模拟商品价格
       const prices: Record<string, number> = {
@@ -89,7 +89,7 @@ export class AgentsService {
       if (!price) {
         return `商品 ${productName} 不存在`;
       }
-      return `创建订单成功，订单编号：${orderNo}；商品名称：${productName}；数量：${quantity}；总价：${price * quantity} 元；客户姓名：${customName}`;
+      return `创建订单成功，订单编号：${orderNo}；商品名称：${productName}；数量：${quantity}；总价：${price * quantity} 元；客户姓名：${customerName}`;
     },
     {
       name: 'create_order',
@@ -99,19 +99,21 @@ export class AgentsService {
         productName: z
           .string()
           .describe(
-            '要创建订单的商品名称，例如： iPhone 14、MacBook Pro、AirPods Pro 等',
+            '要创建订单的商品名称，例如：iPhone 14、MacBook Pro、AirPods Pro 等',
           ),
         quantity: z.number().describe('要创建订单的商品数量'),
-        customName: z.string().describe('客户姓名'),
+        customerName: z.string().describe('客户姓名'),
       }),
     },
   );
   // 工具三：查询订单状态
   private checkOrderStatusTool = tool(
     ({ orderNo }: { orderNo: string }) => {
-      // 模拟订单状态
-      const statuses = ['待支付', '已支付', '已发货', '已完成', '已取消'];
-      return `订单 ${orderNo} 的状态是：${statuses[Math.floor(Math.random() * statuses.length)]}`;
+      // 模拟订单状态（实际项目查数据库）
+      const statuses = ['待支付', '已支付待发货', '已发货运输中', '已签收'];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      const extra = status === '已发货运输中' ? '，预计明天送达' : '';
+      return `订单 ${orderNo} 当前状态：${status}${extra}。`;
     },
     {
       name: 'check_order',
