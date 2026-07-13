@@ -89,6 +89,9 @@ export class AgentsService {
       if (!price) {
         return `商品 ${productName} 不存在`;
       }
+      if (!quantity) {
+        return `商品 ${productName} 已售罄，无法下单`;
+      }
       return `创建订单成功，订单编号：${orderNo}；商品名称：${productName}；数量：${quantity}；总价：${price * quantity} 元；客户姓名：${customerName}`;
     },
     {
