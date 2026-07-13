@@ -21,13 +21,13 @@ export class MemoryController {
     return this.memoryService.memoryChat(sessionId, body.message);
   }
   // POST /memory/chat-stream → 多轮对话（流式）
-  // @Post('chat-stream')
-  // chatStream(
-  //   @Body() body: { sessionId: string; message: string },
-  //   @Res() res: Response,
-  // ) {
-  //   return this.memoryService.chatStream(body.sessionId, body.message, res);
-  // }
+  @Post('chat-stream')
+  chatStream(
+    @Body() body: { sessionId: string; message: string },
+    @Res() res: Response,
+  ) {
+    return this.memoryService.chatStream(body.sessionId, body.message, res);
+  }
 
   // GET /memory/history/:sessionId → 查看会话历史
   @Get('history/:sessionId')

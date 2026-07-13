@@ -94,5 +94,5 @@ export class MemoryService {
       messages,
     };
   }
-  // chatStream() {}
+  chatStream() {}
 }
