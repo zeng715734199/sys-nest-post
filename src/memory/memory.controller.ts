@@ -1,3 +1,4 @@
+import type { Response } from 'express';
 import {
   Controller,
   Post,

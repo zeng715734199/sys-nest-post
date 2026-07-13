@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ChatOllama } from '@langchain/ollama';
+import type { Response } from 'express';
 import { config } from '../config';
 import {
   BaseMessage,
   SystemMessage,
   HumanMessage,
+  AIMessageChunk,
 } from '@langchain/core/messages';
 
 @Injectable()
@@ -94,5 +96,31 @@ export class MemoryService {
       messages,
     };
   }
-  chatStream() {}
+  async chatStream(sessionId: string, message: string, response: Response) {
+    // 设置响应头，指定为服务器发送事件(SSE)格式
+    response.setHeader('Content-Type', 'text/event-stream');
+    // 禁用缓存，确保实时数据传输
+    response.setHeader('Cache-Control', 'no-cache');
+    // 保持连接活跃，支持长连接
+    response.setHeader('Connection', 'keep-alive');
+    // 允许跨域请求
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    const history = this.getOrSetHistory(sessionId);
+    history.push(new HumanMessage(message));
+    let fullReply = '';
+    const stream: AsyncIterable<AIMessageChunk> =
+      await this.llm.stream(history);
+    for await (const chunk of stream) {
+      if (chunk.content) {
+        const text = String(chunk.content);
+        fullReply = fullReply + text;
+        response.write(`data: ${JSON.stringify({ text, sessionId })}\n\n`);
+      }
+    }
+    history.push(new AIMessageChunk(fullReply));
+    response.write(
+      `data: ${JSON.stringify({ text: '[DONE]', turns: Math.floor((history.length - 1) / 2) })}\n\n`,
+    );
+    response.end();
+  }
 }
