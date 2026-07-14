@@ -73,8 +73,11 @@ export class ModelsService {
     // 遍历消息流，将每个内容块写入响应
     for await (const chunk of stream) {
       console.log('chunk：', chunk.content);
-      response.write(chunk.content); // 写入消息内容块
+      // 写入消息内容块
+      response.write(`data: ${JSON.stringify({ content: chunk.content })}\n\n`);
     }
+    // 结束标记
+    response.write(`data: ${JSON.stringify({ status: '[DONE]' })}\n\n`);
     // 完成数据传输，关闭连接
     response.end();
   }

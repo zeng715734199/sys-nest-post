@@ -107,9 +107,9 @@ export class MemoryService {
     response.setHeader('Access-Control-Allow-Origin', '*');
     const history = this.getOrSetHistory(sessionId);
     history.push(new HumanMessage(message));
+    // 拼接完整的消息
     let fullReply = '';
-    const stream: AsyncIterable<AIMessageChunk> =
-      await this.llm.stream(history);
+    const stream = await this.llm.stream(history);
     for await (const chunk of stream) {
       if (chunk.content) {
         const text = String(chunk.content);
