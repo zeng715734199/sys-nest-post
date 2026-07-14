@@ -51,4 +51,38 @@ export class RagService {
       message: `成功加载 ${documents.length} 篇文档，共切成 ${allDocs.length} 个块`,
     };
   }
+  // ── 纯向量检索，不通过大模型 ─────────────────────────────────────────
+  async search(query: string, topK = 3) {
+    if (!this.vectorStore) {
+      return { error: '请先调用 /rag/load 加载文档' };
+    }
+    /**
+     * similaritySearchWithScore
+     * 1. 把 query（用户提问内容） 向量化（调用embedding.embedQuery）
+     * 2. 和向量库里面的所有文档进行 向量计算 余弦相似度
+     * 3. 按照相似度排序，返回前 topK 个文档
+     */
+    const results = await this.vectorStore.similaritySearchWithScore(
+      query,
+      topK,
+    );
+    return {
+      query,
+      results: results.map(([doc, score]) => ({
+        content: doc.pageContent,
+        source: doc.metadata.source as string,
+        score: parseFloat(score.toFixed(4)),
+      })),
+    };
+  }
+  // ── 查询知识库状态 ────────────────────────────────────
+  getStatus() {
+    return {
+      loaded: this.vectorStore !== null,
+      docCount: this.docCount,
+      message: this.vectorStore
+        ? `知识库已加载 ${this.docCount} 篇文档`
+        : '知识库为空，请先加载文档',
+    };
+  }
 }
