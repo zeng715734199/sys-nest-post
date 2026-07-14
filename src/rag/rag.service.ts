@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { ChatOllama, OllamaEmbeddings } from '@langchain/ollama';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { Document } from '@langchain/core/documents';
 import { MemoryVectorStore } from '@langchain/classic/vectorstores/memory';
 import { config } from '../config';
+import { StringOutputParser } from '@langchain/core/output_parsers';
 @Injectable()
 export class RagService {
   private llm = new ChatOllama({
@@ -84,5 +86,66 @@ export class RagService {
         ? `知识库已加载 ${this.docCount} 篇文档`
         : '知识库为空，请先加载文档',
     };
+  }
+  // ── 完整 RAG 问答 ─────────────────────────────────────
+  async query(question: string, topK = 3) {
+    if (!this.vectorStore) {
+      return { error: '请先调用 /rag/load 加载文档' };
+    }
+    // step 1: 检索向量库相关内容
+    const retrieved = await this.vectorStore.similaritySearchWithScore(
+      question,
+      topK,
+    );
+    if (!retrieved.length) {
+      return {
+        question,
+        answer: '知识库中没有找到相关内容',
+        sources: [],
+      };
+    }
+    // step 2: 把检索结果拼接成 context 字符串，作为大模型输入
+    // [1]第一块内容...\n\n[2]第二块内容...
+    // 编号方便模型在回答时引用，根据[1]...,根据[2]...
+    const context = retrieved
+      .map(([doc], idx) => {
+        return `[${idx + 1}] ${doc.pageContent}`;
+      })
+      .join('\n\n');
+    // Step 3：构建 RAG Prompt
+    const prompt = ChatPromptTemplate.fromMessages([
+      [
+        'system',
+        `你是知识库问答助手，严格基于以下参考资料回答问题。
+
+规则：
+1. 只根据参考资料内容回答，不要使用资料外的知识
+2. 如果资料中没有相关信息，回答"知识库中暂无相关内容"
+3. 回答简洁准确，使用中文
+4. 可以说明答案来自第几条参考资料
+
+参考资料：
+{context}`,
+      ],
+      ['human', '{question}'],
+    ]);
+    const chain = prompt.pipe(this.llm).pipe(new StringOutputParser());
+    const answer = await chain.invoke({ question, context });
+
+    return {
+      question,
+      answer,
+      sources: retrieved.map(([doc, score]) => ({
+        content: doc.pageContent,
+        source: doc.metadata.source as string,
+        score: parseFloat(score.toFixed(4)),
+      })),
+    };
+  }
+  // ── 清空知识库 ────────────────────────────────────────
+  clearKnowledge() {
+    this.vectorStore = null;
+    this.docCount = 0;
+    return { success: true, message: '知识库已清空' };
   }
 }
