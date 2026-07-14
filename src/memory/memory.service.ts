@@ -51,7 +51,7 @@ export class MemoryService {
     const allSessions = [...sessionEntries].map(([sessionId, history]) => {
       return {
         sessionId, // 会话ID
-        turns: Math.floor(history.length - 1 / 2), // 计算对话轮次
+        turns: Math.floor((history.length - 1) / 2), // 计算对话轮次
       };
     });
     // 返回包含会话总数和会话列表的对象
