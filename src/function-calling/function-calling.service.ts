@@ -158,7 +158,7 @@ export class FunctionCallingService {
         messages.push(
           new ToolMessage({
             content: result,
-            tool_call_id: toolCall.id,
+            tool_call_id: toolCall.id || '',
           }),
         );
       }

@@ -12,6 +12,7 @@ import { RagModule } from './rag/rag.module';
 import { FunctionCallingModule } from './function-calling/function-calling.module';
 import { ModelsModule } from './models/models.module';
 import { PromptsModule } from './prompts/prompts.module';
+import { RagDbModule } from './rag-db/rag-db.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { PromptsModule } from './prompts/prompts.module';
     FunctionCallingModule,
     ModelsModule,
     PromptsModule,
+    RagDbModule,
   ],
   controllers: [AppController],
   providers: [AppService],
