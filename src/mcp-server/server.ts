@@ -92,7 +92,7 @@ server.registerTool('queryWeather', {
   }),
 }, async (args) => {
   try {
-    const result = await handleWeatherQuery(args.location);
+    const result = await handleWeatherQuery(args);
     return {
       content: [
         {

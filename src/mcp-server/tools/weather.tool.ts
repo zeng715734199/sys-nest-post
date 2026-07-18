@@ -1,8 +1,8 @@
 export async function handleWeatherQuery(args: any): Promise<string> {
-  const { city } = args;
+  const { location } = args;
 
   // 实际项目接真实天气 API（如高德天气 API、和风天气 API）
-  // const resp = await fetch(`https://restapi.amap.com/v3/weather/weatherInfo?city=${city}&key=${API_KEY}`)
+  // const resp = await fetch(`https://restapi.amap.com/v3/weather/weatherInfo?location=${location}&key=${API_KEY}`)
 
   // 演示：模拟天气数据
   const weatherData: Record<
@@ -16,10 +16,10 @@ export async function handleWeatherQuery(args: any): Promise<string> {
     深圳: { temp: 27, weather: '多云', humidity: 75, wind: '东南风2级' },
   };
 
-  const data = weatherData[city];
+  const data = weatherData[location];
   if (!data) {
-    return `暂不支持查询 ${city} 的天气，目前支持：北京、上海、武汉、广州、深圳`;
+    return `暂不支持查询 ${location} 的天气，目前支持：北京、上海、武汉、广州、深圳`;
   }
 
-  return `${city}实时天气：${data.weather}，温度 ${data.temp}°C，湿度 ${data.humidity}%，${data.wind}`;
+  return `${location}实时天气：${data.weather}，温度 ${data.temp}°C，湿度 ${data.humidity}%，${data.wind}`;
 }
