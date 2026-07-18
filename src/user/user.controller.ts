@@ -9,9 +9,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import {CreateUserDto} from "./dto/create-user.dto";
-import {UpdateUserDto} from "./dto/update-user.dto";
-import {QueryUserDto} from "./dto/query-user.dto";
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { QueryUserDto } from './dto/query-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -33,7 +33,7 @@ export class UserController {
   }
   // 查
   @Get('list')
-  findAll(@Query () query: QueryUserDto) {
+  findAll(@Query() query: QueryUserDto) {
     return this.userService.findAll(query);
   }
 
