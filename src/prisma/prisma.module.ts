@@ -1,7 +1,7 @@
 // src/prisma/prisma.module.ts
 
-import { Global, Module } from '@nestjs/common'
-import { PrismaService } from './prisma.service'
+import { Global, Module } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
 
 // @Global() 设置为全局模块
 // 只要在 AppModule 里注册一次，全项目都能注入 PrismaService
