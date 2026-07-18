@@ -5,6 +5,8 @@ import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PostModule } from './post/post.module';
 import { ConfigModule } from '@nestjs/config';
+import { McpClientModule } from './mcp-client/mcp-client.module';
+import { McpAgentModule } from './mcp-agent/mcp-agent.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { ConfigModule } from '@nestjs/config';
     UserModule,
     PostModule,
     PrismaModule,
+    McpClientModule,
+    McpAgentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
