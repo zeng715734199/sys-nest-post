@@ -54,7 +54,7 @@ server.registerTool(
 
 
 // 工具2： 读取文件的工具
-server.registerTool('readfile', {
+server.registerTool('readFile', {
   description: 'Read the contents of a file given its path',
   inputSchema: z.object({
     filePath: z.string().describe('The path to the file to read'),
@@ -118,6 +118,7 @@ server.registerTool('queryWeather', {
 async function startServer() {
   try {
     const transport = new StdioServerTransport();
+    // 工具函数注册在server上，在server启动后，可以通过server调用工具函数
     await server.connect(transport);
     console.log('Mcp Server is running on port 3000')
   } catch (error) {

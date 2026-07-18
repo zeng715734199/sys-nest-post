@@ -4,6 +4,6 @@ import { McpAgentService } from './mcp-agent.service';
 
 @Module({
   controllers: [McpAgentController],
-  providers: [McpAgentService]
+  providers: [McpAgentService],
 })
 export class McpAgentModule {}
