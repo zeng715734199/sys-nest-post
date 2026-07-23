@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ChatOllama } from '@langchain/ollama';
 import { tool } from '@langchain/core/tools';
-import type { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 import {
   HumanMessage,

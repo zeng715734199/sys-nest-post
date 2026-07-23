@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ChatOpenAI } from '@langchain/openai';
+import { ChatOllama } from '@langchain/ollama';
 import {
   StateGraph,
   MessagesAnnotation,
@@ -18,11 +18,12 @@ import { config } from '../config';
 export class LanggraphService implements OnModuleInit {
   private simpleGraph!: ReturnType<typeof this.buildSimpleGraph>;
   private memoryGraph!: ReturnType<typeof this.buildMemoryGraph>;
-  private llm = new ChatOpenAI({
-    model: process.env.LANGGRAPH_MODEL || 'llama3.2: 3b',
-    temperature: 0.8,
-    apiKey: config.langGraph.apiKey,
-    configuration: { baseURL: config.langGraph.baseURL },
+  private llm = new ChatOllama({
+    model: config.ollama.chatModel,
+    baseUrl: config.ollama.baseUrl,
+    temperature: 0.3, // 低温度，让工具调用决策更稳定
+    think: false,
+    numPredict: 1024,
   });
 
   /**
