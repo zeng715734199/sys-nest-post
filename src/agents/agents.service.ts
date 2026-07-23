@@ -203,8 +203,7 @@ export class AgentsService {
           `🔧 [调用工具] ${toolCall.name}(${JSON.stringify(toolCall.args)})`,
         );
 
-        const tool = toolMap[toolCall.name] as
-          DynamicStructuredTool<typeof z.ZodObject, string> | undefined;
+        const tool = toolMap[toolCall.name];
         if (!tool) {
           const errMsg = `工具「${toolCall.name}」不存在`;
           steps.push(`【错误】：${errMsg}`);
@@ -217,7 +216,7 @@ export class AgentsService {
           continue;
         }
         // 执行工具，获取结果
-        const toolResult = (await tool.invoke(toolCall.args as any)) as string;
+        const toolResult = await tool.invoke(toolCall.args);
         steps.push(`【工具结果】：${toolResult}`);
         messages.push(
           new ToolMessage({

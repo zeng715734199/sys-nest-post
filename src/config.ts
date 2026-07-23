@@ -25,4 +25,10 @@ export const config = {
     // 1.0 = 最随机，适合头脑风暴
     temperature: 0.3,
   },
+  langGraph: {
+    model: process.env.LANGGRAPH_MODEL || 'llama3.2:3b',
+    baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1',
+    apiKey: 'ollama', // Ollama 不校验 apiKey，随便填个占位符即可
+    temperature: 0.7,
+  },
 };

@@ -15,6 +15,7 @@ import { FunctionCallingModule } from './function-calling/function-calling.modul
 import { ModelsModule } from './models/models.module';
 import { PromptsModule } from './prompts/prompts.module';
 import { RagDbModule } from './rag-db/rag-db.module';
+import { LanggraphModule } from './langgraph/langgraph.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { RagDbModule } from './rag-db/rag-db.module';
     ModelsModule,
     PromptsModule,
     RagDbModule,
+    LanggraphModule,
   ],
   controllers: [AppController],
   providers: [AppService],
