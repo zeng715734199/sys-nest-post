@@ -1,12 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ChatOllama } from '@langchain/ollama';
-import {
-  StateGraph,
-  START,
-  END,
-  MemorySaver,
-  Annotation,
-} from '@langchain/langgraph';
+import { StateGraph, START, END, Annotation } from '@langchain/langgraph';
 import { SystemMessage } from '@langchain/core/messages';
 import { config } from '../config';
 
@@ -20,7 +14,12 @@ export class ArticleService implements OnModuleInit {
     think: false,
     numPredict: 1024,
   });
+  /**
+   * 构建文章处理图，包含关键词提取和摘要生成两个主要步骤
+   * @returns {StateGraph} 编译后的状态图
+   */
   buildArticleGraph() {
+    // 定义文章状态结构，包含文章内容、关键词、摘要和处理日志
     const ArticleState = Annotation.Root({
       // 文章：新值覆盖旧
       article: Annotation<string>(),
@@ -37,6 +36,11 @@ export class ArticleService implements OnModuleInit {
         default: () => [],
       }),
     });
+    /**
+     * 提取文章关键词的异步函数
+     * @param {typeof ArticleState.State} state - 当前文章状态
+     * @returns {Promise<{keywords: string[], log: string[]}> - 包含提取的关键词和处理日志
+     */
     const extractKeywords = async (state: typeof ArticleState.State) => {
       const extraStartTime = Date.now();
       const { article } = state;
@@ -60,6 +64,11 @@ export class ArticleService implements OnModuleInit {
         ],
       };
     };
+    /**
+     * 生成文章摘要的异步函数
+     * @param state - 包含文章内容和关键词的状态对象，类型为ArticleState.State
+     * @returns 返回一个包含摘要和日志信息的对象
+     */
     const generateSummary = async (state: typeof ArticleState.State) => {
       const generateStartTime = Date.now();
       const { article, keywords } = state;
@@ -71,6 +80,7 @@ export class ArticleService implements OnModuleInit {
         ),
       ];
       const response = await this.llm.invoke(messages);
+      // 处理响应内容，移除"assistant\n\n"前缀
       const summary = ((response.content as string) || '').replaceAll(
         'assistant\n\n',
         '',
