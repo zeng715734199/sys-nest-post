@@ -1,5 +1,4 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { BaseLLM } from 'src/llm';
 import {
   StateGraph,
   START,
@@ -15,6 +14,7 @@ import {
   SystemMessage,
 } from '@langchain/core/messages';
 import { z } from 'zod';
+import { BaseLLM } from 'src/llm';
 
 const queryWeatherTool = tool(
   ({ city }: { city: string }) => {
@@ -69,8 +69,8 @@ export class ReactAgentService extends BaseLLM implements OnModuleInit {
     const callModel = async (state: typeof MessagesAnnotation.State) => {
       const messages = [
         new SystemMessage(`你是专业的工具调用助手，可用工具：
-- calculator：数学计算;
-- get_weather：查询天气;
+- calculate_expression：数学计算;
+- query_weather：查询天气;
 根据问题决定是否调用工具。`),
         ...state.messages,
       ];
@@ -79,7 +79,11 @@ export class ReactAgentService extends BaseLLM implements OnModuleInit {
         messages: [response],
       };
     };
-
+    /**
+      START → callModel ──有 tool_calls──→ tools ──→（返回）callModel（循环）
+              │
+              └──无 tool_calls──→ END
+    */
     return new StateGraph(MessagesAnnotation)
       .addNode('callModel', callModel)
       .addNode('tools', new ToolNode(this.tools))
