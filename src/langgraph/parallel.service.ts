@@ -55,8 +55,8 @@ export class ParallelService extends BaseLLM implements OnModuleInit {
 - 角色
 你是一个专业的任务拆分专家。
 - 描述
-把用户输入的任务拆分成 3 个子任务，每个子任务独占一行。使用换行符"\n"分隔开。
-如：子任务1：xxx\n子任务2：xxx\n子任务3：xxx。
+把用户输入的任务拆分成 3 个子任务，每个子任务独占一行，使用换行符"\n"分隔开。
+如：1. xxx\n2. xxx\n3. xxx。
 ***除了子任务内容外，不要输出其他内容！***
 - 输入任务
 {task}`,
@@ -91,6 +91,7 @@ export class ParallelService extends BaseLLM implements OnModuleInit {
       ]);
       const chain = this.handleOutput(prompt);
       const result = await chain.invoke({ task: state.task });
+      console.log(`子任务: ${state.task}； 处理结果：`, result);
       // 接受子任务的数据，返回的时候主任务的数据
       return {
         results: [{ task: state.task, result }],
@@ -110,7 +111,15 @@ export class ParallelService extends BaseLLM implements OnModuleInit {
         report: res.content,
       };
     };
+    /**
+        START → splitTask ──Send──→ processSubTask（实例1）─┐
+                          ──Send──→ processSubTask（实例2）─┤→ mergeResults → END
+                          ──Send──→ processSubTask（实例3）─┘
 
+        执行说明：
+        splitTask：LLM 把大任务拆成 3 个子任务，返回 Send 数组。3 个 processSubTask 实例同时并行执行，全部完成后结果通过 reducer 合并到主图 State。
+        mergeResults：汇总所有子任务结果，生成综合报告。
+    */
     return new StateGraph(ParallelTaskState)
       .addNode('splitTask', splitTask, { ends: ['processSubTask'] })
       .addNode('processSubTask', processSubTask, { ends: ['mergeResults'] })
@@ -130,7 +139,7 @@ export class ParallelService extends BaseLLM implements OnModuleInit {
       ),
       results: result.results,
       report: result.report,
-      totalTime: `${Date.now() - t0} ms`,
+      totalTime: `${(Date.now() - t0) / 1000} s`,
     };
   }
 }
