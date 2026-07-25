@@ -5,3 +5,6 @@ export const generateUUID = () => {
     return v.toString(16);
   });
 };
+
+export const filterRedundantString = (text: string = '') =>
+  text.replace(/^(assistant|ai|system|user)[:\s\n]*/i, '').trim();

@@ -50,7 +50,7 @@ export class ParallelService extends BaseLLM implements OnModuleInit {
     const splitTask = async (state: typeof ParallelTaskState.State) => {
       const prompt = ChatPromptTemplate.fromMessages([
         [
-          'system',
+          'human',
           `
 - 角色
 你是一个专业的任务拆分专家。
@@ -79,7 +79,7 @@ export class ParallelService extends BaseLLM implements OnModuleInit {
     const processSubTask = async (state: typeof ChildTaskState.State) => {
       const prompt = ChatPromptTemplate.fromMessages([
         [
-          'system',
+          'human',
           `
 - 角色
 你是一个专业的任务处理专家。
