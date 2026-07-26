@@ -57,15 +57,17 @@ export class SupervisorService extends BaseLLM implements OnModuleInit {
     const supervisorNode = async (state: typeof SupervisorState.State) => {
       const messages = [
         new SystemMessage(
-          `你是一个专业的agent调度专家，能分析用户输入，返回最合适的agent来解决问题。
-          以下是各个agent的介绍：
+          `你是一个专业的agent调度专家，能分析用户输入，每次返回最合适的agent来解决问题。
+以下是各个agent的介绍：
 - researcher：收集信息、搜索资料；
 - analyst：数据分析、逻辑推理；
 - writer：撰写报告、优化表达；
 - FINISH：终止信号，无合适场景可返回此。
 
-***每次只输出agent名称，不要返回其他内容。***
-- ${state.completedAgent?.length ? `已调用的agent：${state.completedAgent.join('、')}` : ''}
+1. 支持多轮调用，每次只返回一个agent名称。
+2. ***每次只输出agent名称，不要返回其他内容。***
+
+${state.completedAgent?.length ? `- 已调用的agent：${state.completedAgent.join('、')}` : ''}
 `,
         ),
         ...state.messages,
@@ -77,11 +79,13 @@ export class SupervisorService extends BaseLLM implements OnModuleInit {
       console.log(`下一步调用agent：${nextAgent}`);
       return {
         nextAgent,
-        messages: [new AIMessage(`[Supervisor] 下一步 → ${nextAgent}`)],
+        messages: nextAgent
+          ? [new AIMessage(`[Supervisor] 下一步 → ${nextAgent}`)]
+          : [],
       };
     };
 
-    const agentCommonAction = (systemPrompt: string = '') => {
+    const agentCommonAction = (name: string, systemPrompt: string = '') => {
       return async (state: typeof SupervisorState.State) => {
         // 取第一条用户消息作为任务描述
         const userMsg = state.messages.find((m) => m.type === 'human');
@@ -100,13 +104,11 @@ export class SupervisorService extends BaseLLM implements OnModuleInit {
         ];
         const response = await this.llm.invoke(messages);
 
-        console.log(`[${state.nextAgent}]：${response.content}`);
+        console.log(`[${name}]：${response.content}`);
 
         return {
-          completedAgent: [state.nextAgent],
-          messages: [
-            new AIMessage(`[${state.nextAgent}]：${response.content}`),
-          ],
+          completedAgent: [name],
+          messages: [new AIMessage(`[${name}]：${response.content}`)],
         };
       };
     };
@@ -114,15 +116,15 @@ export class SupervisorService extends BaseLLM implements OnModuleInit {
       .addNode('supervisor', supervisorNode)
       .addNode(
         'researcher',
-        agentCommonAction('你是一个专业的收集信息、搜索资料专家'),
+        agentCommonAction('researcher', '你是一个专业的收集信息、搜索资料专家'),
       )
       .addNode(
         'analyst',
-        agentCommonAction('你是一个专业的数据分析、逻辑推理专家'),
+        agentCommonAction('analyst', '你是一个专业的数据分析、逻辑推理专家'),
       )
       .addNode(
         'writer',
-        agentCommonAction('你是一个专业的撰写报告、优化表达专家'),
+        agentCommonAction('writer', '你是一个专业的撰写报告、优化表达专家'),
       )
       .addEdge(START, 'supervisor')
       .addConditionalEdges(
@@ -146,10 +148,32 @@ export class SupervisorService extends BaseLLM implements OnModuleInit {
       .compile();
   }
   async run(input: string) {
-    const response = await this.supervisorGraph.invoke({
-      messages: [new HumanMessage(input)],
-    });
+    const response = await this.supervisorGraph.invoke(
+      {
+        messages: [new HumanMessage(input)],
+      },
+      {
+        recursionLimit: 10,
+      },
+    );
     console.log(response, 'resssss');
+    const agentLog = response.messages.reduce((arr, m) => {
+      if ((m.content as string)?.startsWith?.('[')) {
+        return arr.concat(m.content as string);
+      }
+      return arr;
+    }, [] as string[]);
+    // 整理报告
+    let finalReport = '';
+    if (response.completedAgent.includes('writer')) {
+      const writerOutputs = agentLog.filter((l) => l.startsWith('[writer]'));
+      finalReport = writerOutputs.length
+        ? writerOutputs.at(-1)!.replace('[writer] ', '')
+        : (agentLog.at(-1) ?? '无输出');
+    } else {
+      finalReport = agentLog.at(-1) ?? '无输出';
+    }
+
     return {
       input,
       agentLog: response.messages.reduce((arr, m) => {
@@ -159,7 +183,7 @@ export class SupervisorService extends BaseLLM implements OnModuleInit {
         return arr;
       }, [] as string[]),
       completedAgent: response.completedAgent,
-      report: response.messages.at(-1)?.content ?? '',
+      finalReport,
     };
   }
 }
