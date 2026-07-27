@@ -7,6 +7,7 @@ import { ParallelService } from './parallel.service';
 import { SupervisorService } from './supervisor.service';
 import { PipelineService } from './pipeline.service';
 import { CodeReviewService } from './code-review.service';
+import { EmailApprovalService } from './email-approval.service';
 
 @Controller('langgraph')
 export class LanggraphController {
@@ -19,6 +20,7 @@ export class LanggraphController {
     private readonly supervisorSvc: SupervisorService,
     private readonly pipelineSvc: PipelineService,
     private readonly codeReviewSvc: CodeReviewService,
+    private readonly emailSvc: EmailApprovalService,
   ) {}
 
   // ── 第一章接口 ──────────────────────────────────────
@@ -80,5 +82,30 @@ export class LanggraphController {
   @Post('code-review')
   codeReview(@Body() body: { code: string; language?: string }) {
     return this.codeReviewSvc.review(body.code, body.language);
+  }
+
+  // 第四章
+  @Post('email/start')
+  emailStart(@Body() body: { request: string; threadId: string }) {
+    return this.emailSvc.start(body.request, body.threadId);
+  }
+  @Post('email/:threadId/approve')
+  emailApprove(@Param('threadId') threadId: string) {
+    return this.emailSvc.approve(threadId);
+  }
+  @Post('email/:threadId/reject')
+  emailReject(@Param('threadId') threadId: string) {
+    return this.emailSvc.reject(threadId);
+  }
+  @Post('email/:threadId/modify')
+  emailModify(
+    @Param('threadId') threadId: string,
+    @Body() body: { feedback: string },
+  ) {
+    return this.emailSvc.requestModify(threadId, body.feedback);
+  }
+  @Get('email/:threadId/state')
+  emailState(@Param('threadId') threadId: string) {
+    return this.emailSvc.getState(threadId);
   }
 }
