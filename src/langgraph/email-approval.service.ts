@@ -98,11 +98,14 @@ export class EmailApprovalService extends BaseLLM implements OnModuleInit {
         approvalStatus === 'modify'
           ? `请根据修改意见和上一轮邮件内容重新起草邮件。\n- 修改意见\n${feedback}\n- 上一轮邮件内容\n邮件主题：${parsedJson.subject}；收件人邮箱：${parsedJson.recipientEmail}；邮件内容：${parsedJson.content}`
           : `请根据邮件需求描述起草邮件。\n- 邮件需求描述\n${emailRequest}`;
-      const response = await this.llm.invoke([
+      const messages = [
         new HumanMessage(
           `${prompt}\n\n***只允许输出JSON格式数据（不需要其他内容），如：{"subject":"xxx","recipientEmail":"xxx@xxx.com","content":"xxx}。***\n邮件主题-subject; 收件人邮箱-recipientEmail; 邮件内容-content;`,
         ),
-      ]);
+      ];
+      const response = await this.llm.invoke(messages);
+
+      console.log('当前上下文：', messages);
       return {
         approvalStatus: 'pending' as const,
         emailJsonContent: response.content,
@@ -240,6 +243,7 @@ export class EmailApprovalService extends BaseLLM implements OnModuleInit {
     }
     return { status: 'email_rejected', message: response.finalStatus };
   }
+
   async requestModify(threadId: string, feedback: string) {
     const result = await this.EmailApprovalGraph.invoke(
       new Command({
